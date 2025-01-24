@@ -3,7 +3,8 @@
 Start by setting 
 
 ```
-export PROXMOX_URL="https://<Proxmox Node>:8006"                                                                                                                                                                       ░▒▓ ✔  3.export PROXMOX_USER="root@pam"
+export PROXMOX_URL="https://<Proxmox Node>:8006" 
+export PROXMOX_USER="root@pam"
 export PROXMOX_PASS='<PASSWORD>'
 ```
 
