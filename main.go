@@ -30,7 +30,10 @@ type VM struct {
 	Status string `json:"status"`
 }
 
-var config Config
+var (
+	config Config
+	vmData []VM
+)
 
 func main() {
 	// Load configuration
@@ -60,15 +63,25 @@ func main() {
 
 	fmt.Printf("Proxmox Version: %s, Release: %s, Repoid: %s\n", version.Version, version.Release, version.Repoid)
 
-	// Fetch and display VMs
-	vms, err := fetchVMs(ticket, csrfToken)
+	// Fetch VM data
+	vmData, err = fetchVMs(ticket, csrfToken)
 	if err != nil {
 		log.Fatalf("Failed to fetch VMs: %v", err)
 	}
 
-	fmt.Println("List of VMs:")
-	for _, vm := range vms {
-		fmt.Printf("ID: %d, Name: %s, Status: %s\n", vm.ID, vm.Name, vm.Status)
+	// Start the HTTP server
+	http.HandleFunc("/api/data", handleDataEndpoint)
+	log.Println("Starting server on :8080")
+	log.Fatal(http.ListenAndServe(":8080", nil))
+}
+
+// handleDataEndpoint serves the VM data in JSON format.
+func handleDataEndpoint(w http.ResponseWriter, r *http.Request) {
+	log.Println("Received request on /api/data")
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(vmData); err != nil {
+		log.Printf("Failed to encode VM data: %v", err)
+		http.Error(w, fmt.Sprintf("Failed to encode VM data: %v", err), http.StatusInternalServerError)
 	}
 }
 
